@@ -1,0 +1,60 @@
+Build a complete full-stack web app called *Smart Resume Reviewer* using Python (Flask or FastAPI) + HTML/CSS/JS, designed for job seekers.  
+The app must use *Google Gemini API* instead of OpenAI GPT and should work perfectly on Replit Free Plan.
+
+### Features Required:
+1. *Resume Upload / Input:*
+   - Allow users to upload resumes in PDF or text format.
+   - Also provide a textarea where users can paste their resume.
+
+2. *Job Role & Description:*
+   - Input field for users to specify their target job role.
+   - Option to upload or paste the job description for better analysis.
+
+3. *Gemini API Integration:*
+   - Use Google Gemini *1.5 Flash* model.
+   - Generate:
+     - Missing skills/keywords relevant to the job.
+     - Section-wise constructive feedback (Education, Experience, Skills, etc.).
+     - Redundant/vague language highlights.
+     - Formatting & clarity recommendations.
+     - A *new improved version* of the resume optimized for the given job.
+
+4. *Output Page:*
+   - Show a clean UI with:
+     - Feedback section (with proper formatting).
+     - A downloadable *PDF option* for the improved resume.
+
+5. *Frontend (Responsive & Modern):*
+   - Use Bootstrap or Tailwind CSS.
+   - Make UI attractive, simple, and recruiter-friendly.
+
+6. *Security & Privacy:*
+   - Use *Replit Secrets* to store the Gemini API key securely.
+   - Never hardcode API keys in the code.
+
+7. *Export & Hosting:*
+   - Fully compatible with Replit's free plan.
+   - Include an option to export the entire project directly to *GitHub*.
+
+### Technical Details:
+- *Backend:* Python (Flask / FastAPI)
+- *Frontend:* HTML, Tailwind/Bootstrap, JavaScript
+- *AI Model:* Google Gemini 1.5 Flash (free, fast, suitable for hackathons)
+- *Dependencies:* 
+    - google-generativeai for Gemini API
+    - PyMuPDF or pdfplumber for PDF parsing
+    - Flask or FastAPI for backend
+    - jinja2 for templates
+
+### Gemini API Usage:
+- Install SDK: pip install google-generativeai
+- Configure key using Replit Secrets:
+    - Key: GEMINI_API_KEY
+    - Use: 
+      python
+      import google.generativeai as genai
+      genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+      model = genai.GenerativeModel("gemini-1.5-flash")
+      
+
+Make the code clean, well-structured, and optimized for a hackathon demo.
