@@ -1,0 +1,25 @@
+- Perform a deployment readiness audit for a Python web app that will run on Render. The project was exported from Replit. A previous action mistakenly renamed the .replit file to requirements.txt; revert that and regenerate a valid requirements.txt for pip.
+- Tasks:
+  1) Restore correct config files:
+     - If .replit is missing, recreate it in TOML format with a correct entrypoint and run command, e.g. run = ["python3","main.py"]. Do not use .replit as a dependency file. Keep any replit.nix as-is. Explain any changes in comments at the top of each file. [1]
+  2) Generate a clean requirements.txt:
+     - Inspect the code to determine top-level Python dependencies and pin reasonable versions. Do not include placeholders, extras with stray brackets, comments without a leading “#”, or invalid specifiers that would cause pip._vendor.packaging.requirements.InvalidRequirement errors (“Expected matching RIGHT_BRACKET for LEFT_BRACKET”, “placeholder[::]”, etc.). Validate every line matches pip requirement grammar (e.g., package==x.y.z, package>=a.b,<c). [2][3]
+     - If the project used Poetry/pyproject.toml, export dependencies using “pip-compile” or “poetry export --without-hashes -f requirements.txt -o requirements.txt”, then sanitize the file for pip compatibility. Remove environment markers or extras the app doesn’t need if they cause parse errors. [4][5]
+  3) Local install test:
+     - In the Replit Shell, create a fresh virtual environment and run “pip install -r requirements.txt”. Fix any InvalidRequirement or resolver errors until install succeeds cleanly. Document the final command used. [3][6]
+  4) Render compatibility:
+     - Ensure the repository root contains requirements.txt and the app’s entry file (e.g., app.py or main.py). Prepare a README section titled “Render Deploy” with:
+       - Build Command: pip install -r requirements.txt
+       - Start Command: python3 main.py (or uvicorn module:app --host 0.0.0.0 --port $PORT for ASGI)
+       - Python version note and, if needed, a runtime.txt or Render setting pin (e.g., 3.11). [6][7]
+  5) Remove incorrect files:
+     - Delete any wrongly named files like requirements.txt containing .replit TOML, or files that include “placeholder[…]” or unmatched brackets. Confirm no build step references a non-existent path. [2][8]
+  6) Final verification:
+     - Run the app in Replit to confirm it starts and serves an HTTP endpoint. Provide a short checklist for Render: correct root directory, Build Command, Start Command, environment variables, and health check. Link the exact file paths changed.
+
+- Acceptance criteria:
+  - requirements.txt installs without errors in a clean venv.
+  - .replit is restored as a config file (not mistaken for requirements), with a valid run command. [1]
+  - A “Render Deploy” section exists in README with the precise commands to use.
+  - No line in requirements.txt contains unmatched brackets or invalid extras syntax that would trigger InvalidRequirement. Show the final requirements.txt contents in the chat. [2][3]
+  - Provide a short summary of root cause (misnamed .replit leading to malformed requirements and Render build failure) and the exact fixes applied, referencing the first failing log message pattern. [8][6]
