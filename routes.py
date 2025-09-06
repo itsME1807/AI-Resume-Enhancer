@@ -95,11 +95,11 @@ def analyze_resume():
         flash('An unexpected error occurred. Please try again.', 'error')
         return redirect(url_for('index'))
 
-@app.route('/download_improved_resume')
+@app.route('/download_improved_resume', methods=['POST'])
 def download_improved_resume():
     try:
-        improved_resume = request.args.get('improved_resume', '')
-        job_role = request.args.get('job_role', 'Professional')
+        improved_resume = request.form.get('improved_resume', '')
+        job_role = request.form.get('job_role', 'Professional')
         
         if not improved_resume:
             flash('No improved resume content available for download.', 'error')

@@ -22,11 +22,14 @@
             </a>
             
             {% if analysis.improved_resume %}
-            <a href="{{ url_for('download_improved_resume', improved_resume=analysis.improved_resume, job_role=job_role) }}" 
-               class="btn btn-success">
-                <i data-feather="download" class="me-1"></i>
-                Download Improved Resume PDF
-            </a>
+            <form method="POST" action="{{ url_for('download_improved_resume') }}" class="d-inline">
+                <input type="hidden" name="improved_resume" value="{{ analysis.improved_resume }}">
+                <input type="hidden" name="job_role" value="{{ job_role }}">
+                <button type="submit" class="btn btn-success">
+                    <i data-feather="download" class="me-1"></i>
+                    Download Improved Resume PDF
+                </button>
+            </form>
             {% endif %}
         </div>
     </div>
@@ -170,11 +173,14 @@
                 </div>
                 
                 <div class="d-grid">
-                    <a href="{{ url_for('download_improved_resume', improved_resume=analysis.improved_resume, job_role=job_role) }}" 
-                       class="btn btn-success">
-                        <i data-feather="download" class="me-1"></i>
-                        Download as PDF
-                    </a>
+                    <form method="POST" action="{{ url_for('download_improved_resume') }}" class="d-inline">
+                        <input type="hidden" name="improved_resume" value="{{ analysis.improved_resume }}">
+                        <input type="hidden" name="job_role" value="{{ job_role }}">
+                        <button type="submit" class="btn btn-success w-100">
+                            <i data-feather="download" class="me-1"></i>
+                            Download as PDF
+                        </button>
+                    </form>
                 </div>
                 
                 <hr>
