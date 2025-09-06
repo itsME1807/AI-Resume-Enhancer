@@ -1,2 +1,2 @@
 [agent]
-integrations = ["python_gemini==1.0.0", "styling_replit==1.0.0"]
+integrations = ["styling_replit==1.0.0", "python_gemini==1.0.0"]
