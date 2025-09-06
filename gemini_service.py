@@ -1,8 +1,7 @@
 import os
 import logging
 import json
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 class GeminiResumeAnalyzer:
     def __init__(self):
@@ -10,8 +9,8 @@ class GeminiResumeAnalyzer:
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         
-        self.client = genai.Client(api_key=api_key)
-        self.model = "gemini-2.5-flash"
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel("gemini-1.5-flash")
     
     def analyze_resume(self, resume_content, job_role, job_description=""):
         """
@@ -21,10 +20,7 @@ class GeminiResumeAnalyzer:
             # Create comprehensive prompt for analysis
             prompt = self._create_analysis_prompt(resume_content, job_role, job_description)
             
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             
             if not response.text:
                 raise Exception("Empty response from Gemini API")
@@ -199,10 +195,7 @@ Format the improved resume professionally with clear sections and bullet points.
 IMPROVED RESUME:
 """
             
-            response = self.client.models.generate_content(
-                model=self.model,
-                contents=prompt
-            )
+            response = self.model.generate_content(prompt)
             
             return response.text if response.text else "Unable to generate improved resume."
             
