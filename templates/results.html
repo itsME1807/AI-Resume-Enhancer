@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Resume Analysis Results - Smart Resume Reviewer{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <!-- Header -->
+        <div class="text-center mb-4">
+            <h1 class="display-6 fw-bold">
+                <i data-feather="check-circle" class="text-success me-2"></i>
+                Resume Analysis Complete
+            </h1>
+            <p class="lead text-muted">AI-powered feedback for your <strong>{{ job_role }}</strong> position</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">
+                <i data-feather="arrow-left" class="me-1"></i>
+                Analyze Another Resume
+            </a>
+            
+            {% if analysis.improved_resume %}
+            <a href="{{ url_for('download_improved_resume', improved_resume=analysis.improved_resume, job_role=job_role) }}" 
+               class="btn btn-success">
+                <i data-feather="download" class="me-1"></i>
+                Download Improved Resume PDF
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Analysis Results -->
+    <div class="col-lg-8">
+        
+        <!-- Missing Skills Section -->
+        {% if analysis.missing_skills %}
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h4 class="card-title mb-0">
+                    <i data-feather="alert-triangle" class="me-2"></i>
+                    Missing Skills & Keywords
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Skills and keywords that would strengthen your resume for this role:</p>
+                <div class="row g-2">
+                    {% for skill in analysis.missing_skills %}
+                    <div class="col-md-6">
+                        <span class="badge bg-warning text-dark p-2 w-100 text-start">
+                            <i data-feather="plus-circle" class="me-1"></i>
+                            {{ skill }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Section-wise Feedback -->
+        {% if analysis.section_feedback %}
+        <div class="card mb-4">
+            <div class="card-header bg-info">
+                <h4 class="card-title mb-0">
+                    <i data-feather="edit-3" class="me-2"></i>
+                    Section-wise Feedback
+                </h4>
+            </div>
+            <div class="card-body">
+                {% for section, feedback in analysis.section_feedback.items() %}
+                <div class="mb-4">
+                    <h5 class="text-primary">
+                        <i data-feather="chevron-right" class="me-1"></i>
+                        {{ section }}
+                    </h5>
+                    <div class="border-start border-primary border-3 ps-3">
+                        <p class="mb-0">{{ feedback | replace('\n', '<br>') | safe }}</p>
+                    </div>
+                </div>
+                {% if not loop.last %}<hr>{% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Redundant Language -->
+        {% if analysis.redundant_language %}
+        <div class="card mb-4">
+            <div class="card-header bg-danger">
+                <h4 class="card-title mb-0">
+                    <i data-feather="x-circle" class="me-2"></i>
+                    Redundant & Vague Language
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">Consider revising or removing these overused phrases:</p>
+                <ul class="list-unstyled">
+                    {% for item in analysis.redundant_language %}
+                    <li class="mb-2">
+                        <span class="badge bg-danger me-2">
+                            <i data-feather="minus-circle" class="me-1"></i>
+                        </span>
+                        {{ item }}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Formatting Recommendations -->
+        {% if analysis.formatting_recommendations %}
+        <div class="card mb-4">
+            <div class="card-header bg-primary">
+                <h4 class="card-title mb-0">
+                    <i data-feather="layout" class="me-2"></i>
+                    Formatting & Clarity Recommendations
+                </h4>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    {% for rec in analysis.formatting_recommendations %}
+                    <li class="list-group-item d-flex align-items-start">
+                        <i data-feather="arrow-right-circle" class="text-primary me-2 mt-1"></i>
+                        <span>{{ rec }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Raw Response Fallback -->
+        {% if analysis.raw_response and not (analysis.missing_skills or analysis.section_feedback) %}
+        <div class="card mb-4">
+            <div class="card-header bg-secondary">
+                <h4 class="card-title mb-0">
+                    <i data-feather="message-square" class="me-2"></i>
+                    Analysis Results
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="analysis-content">
+                    {{ analysis.raw_response | replace('\n', '<br>') | safe }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Improved Resume Section -->
+    <div class="col-lg-4">
+        {% if analysis.improved_resume %}
+        <div class="card sticky-top" style="top: 20px;">
+            <div class="card-header bg-success text-white">
+                <h4 class="card-title mb-0">
+                    <i data-feather="file-plus" class="me-2"></i>
+                    Improved Resume
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-3">AI-optimized version of your resume:</p>
+                
+                <div class="improved-resume-preview border rounded p-3 mb-3" style="height: 400px; overflow-y: auto; background-color: var(--bs-light);">
+                    <pre class="mb-0" style="white-space: pre-wrap; font-size: 0.8rem;">{{ analysis.improved_resume }}</pre>
+                </div>
+                
+                <div class="d-grid">
+                    <a href="{{ url_for('download_improved_resume', improved_resume=analysis.improved_resume, job_role=job_role) }}" 
+                       class="btn btn-success">
+                        <i data-feather="download" class="me-1"></i>
+                        Download as PDF
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <div class="text-center">
+                    <button class="btn btn-outline-secondary btn-sm" onclick="copyImprovedResume()">
+                        <i data-feather="copy" class="me-1"></i>
+                        Copy Text
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Success Story -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="alert alert-success" role="alert">
+            <div class="d-flex align-items-center">
+                <i data-feather="lightbulb" class="me-3"></i>
+                <div>
+                    <h5 class="alert-heading mb-2">Next Steps</h5>
+                    <p class="mb-0">
+                        Review the feedback carefully, download your improved resume, and consider implementing the suggested changes. 
+                        Remember to customize your resume for each specific job application!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyImprovedResume() {
+    const resumeText = `{{ analysis.improved_resume | replace('\n', '\\n') | replace('"', '\\"') | safe }}`;
+    
+    navigator.clipboard.writeText(resumeText).then(function() {
+        // Show success message
+        const btn = event.target.closest('button');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i data-feather="check" class="me-1"></i>Copied!';
+        btn.classList.remove('btn-outline-secondary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-secondary');
+            feather.replace();
+        }, 2000);
+        
+        feather.replace();
+    }).catch(function(err) {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy text to clipboard.');
+    });
+}
+
+// Auto-scroll to results
+document.addEventListener('DOMContentLoaded', function() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+</script>
+{% endblock %}
