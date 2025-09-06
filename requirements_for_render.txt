@@ -1,0 +1,12 @@
+# Generated requirements.txt for Render deployment
+# Exported from pyproject.toml dependencies with proper pip syntax
+
+email-validator>=2.3.0
+Flask>=3.1.2
+Flask-SQLAlchemy>=3.1.1
+google-generativeai>=0.8.5
+gunicorn>=23.0.0
+psycopg2-binary>=2.9.10
+PyMuPDF>=1.26.4
+reportlab>=4.4.3
+Werkzeug>=3.1.3
