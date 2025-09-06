@@ -23,19 +23,20 @@ An AI-powered web application that helps job seekers optimize their resumes for 
 
 2. **Configure Build Settings:**
    - **Build Command:** `pip install -r requirements.txt`
-   - **Start Command:** `python3 main.py`
-   - **Python Version:** 3.11 (set in Environment or use runtime.txt)
+   - **Start Command:** `gunicorn main:app` (or `python3 main.py`)
+   - **Python Version:** 3.11 (automatically detected from runtime.txt)
 
 3. **Environment Variables:**
    Set the following environment variables in Render:
    ```
    GEMINI_API_KEY=your_gemini_api_key_here
    SESSION_SECRET=your_random_session_secret_here
-   PORT=10000
    ```
 
 4. **Required Files in Repository Root:**
-   - `requirements.txt` - Python dependencies
+   - `requirements.txt` - Python dependencies (✅ created)
+   - `runtime.txt` - Python version specification (✅ created)
+   - `Procfile` - Process file for gunicorn (✅ created)
    - `main.py` - Application entry point
    - All other project files
 
@@ -47,7 +48,12 @@ The application will be available at `https://your-app-name.onrender.com` and se
 pip install -r requirements.txt
 ```
 
-### Start Command Details
+### Start Command Details (Recommended)
+```bash
+gunicorn main:app
+```
+
+**Alternative Start Command:**
 ```bash
 python3 main.py
 ```
