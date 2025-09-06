@@ -245,12 +245,13 @@ def download_improved_resume():
             
             # Detect dates and duration
             if any(pattern in line for pattern in ['2019', '2020', '2021', '2022', '2023', '2024', '2025']) and ('-' in line or 'to' in line.lower() or 'present' in line.lower()):
+                from reportlab.lib.colors import gray
                 date_style = ParagraphStyle(
                     'DateStyle',
                     parent=styles['Normal'],
                     fontSize=10,
                     spaceAfter=8,
-                    textColor='grey'
+                    textColor=gray
                 )
                 story.append(Paragraph(f'<i>{line}</i>', date_style))
                 continue
