@@ -24,6 +24,30 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def is_section_header(line):
+    """Determine if a line is a section header"""
+    section_keywords = [
+        'experience', 'education', 'skills', 'summary', 'objective',
+        'projects', 'certifications', 'achievements', 'awards',
+        'publications', 'languages', 'interests', 'references',
+        'professional experience', 'work experience', 'employment history',
+        'technical skills', 'core competencies', 'qualifications'
+    ]
+    
+    line_lower = line.lower().strip()
+    
+    # Check if line contains section keywords and is relatively short
+    if len(line.split()) <= 4:
+        for keyword in section_keywords:
+            if keyword in line_lower:
+                return True
+    
+    # Check if line is all caps (common for section headers)
+    if line.isupper() and len(line.split()) <= 3:
+        return True
+        
+    return False
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -111,27 +135,81 @@ def download_improved_resume():
                               rightMargin=72, leftMargin=72,
                               topMargin=72, bottomMargin=18)
         
-        # Styles
+        # Create custom styles for resume formatting
         styles = getSampleStyleSheet()
-        title_style = ParagraphStyle(
-            'CustomTitle',
+        
+        # Define custom styles
+        name_style = ParagraphStyle(
+            'NameStyle',
             parent=styles['Heading1'],
-            fontSize=16,
-            spaceAfter=30,
+            fontSize=18,
+            spaceAfter=12,
+            alignment=1,  # Center alignment
+        )
+        
+        section_header_style = ParagraphStyle(
+            'SectionHeader',
+            parent=styles['Heading2'],
+            fontSize=14,
+            spaceAfter=8,
+            spaceBefore=16,
+        )
+        
+        contact_style = ParagraphStyle(
+            'ContactStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            spaceAfter=12,
             alignment=1  # Center alignment
         )
         
-        # Build PDF content
-        story = []
-        story.append(Paragraph(f"Improved Resume - {job_role}", title_style))
-        story.append(Spacer(1, 12))
+        bullet_style = ParagraphStyle(
+            'BulletStyle',
+            parent=styles['Normal'],
+            fontSize=10,
+            leftIndent=20,
+            spaceAfter=6,
+        )
         
-        # Split improved resume into paragraphs and add to PDF
-        paragraphs = improved_resume.split('\n\n')
-        for para in paragraphs:
-            if para.strip():
-                story.append(Paragraph(para.strip(), styles['Normal']))
+        # Parse and format resume content
+        story = []
+        lines = improved_resume.split('\n')
+        name_found = False
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            # Detect name (usually first significant line)
+            if not name_found and len(line.split()) <= 4 and not any(keyword in line.lower() for keyword in ['email', 'phone', '@', 'linkedin', 'experience', 'education', 'skills']):
+                story.append(Paragraph(line, name_style))
+                name_found = True
+                story.append(Spacer(1, 6))
+                continue
+            
+            # Detect contact information
+            if any(keyword in line.lower() for keyword in ['@', 'phone', 'email', 'linkedin', 'github']):
+                story.append(Paragraph(line, contact_style))
+                continue
+                
+            # Detect section headers (common resume sections)
+            if is_section_header(line):
                 story.append(Spacer(1, 12))
+                story.append(Paragraph(line.upper(), section_header_style))
+                story.append(Spacer(1, 6))
+                continue
+            
+            # Detect bullet points
+            if line.startswith('•') or line.startswith('-') or line.startswith('*'):
+                clean_line = line[1:].strip()
+                story.append(Paragraph(f'• {clean_line}', bullet_style))
+                continue
+            
+            # Regular content
+            if line:
+                story.append(Paragraph(line, styles['Normal']))
+                story.append(Spacer(1, 4))
         
         doc.build(story)
         buffer.seek(0)
