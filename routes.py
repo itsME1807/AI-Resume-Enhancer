@@ -125,7 +125,10 @@ def download_improved_resume():
         improved_resume = request.form.get('improved_resume', '')
         job_role = request.form.get('job_role', 'Professional')
         
+        logging.info(f"PDF download request - job_role: {job_role}, resume length: {len(improved_resume)}")
+        
         if not improved_resume:
+            logging.error("No improved resume content provided")
             flash('No improved resume content available for download.', 'error')
             return redirect(url_for('index'))
         
@@ -171,92 +174,42 @@ def download_improved_resume():
             spaceAfter=6,
         )
         
-        # Parse and format resume content with enhanced logic
+        # Simplified PDF generation with basic formatting
         story = []
         lines = improved_resume.split('\n')
         name_found = False
-        current_section = None
         
-        # Create additional styles for better formatting
-        job_title_style = ParagraphStyle(
-            'JobTitleStyle',
-            parent=styles['Normal'],
-            fontSize=12,
-            spaceAfter=4,
-            spaceBefore=6,
-            textColor='black'
-        )
-        
-        company_style = ParagraphStyle(
-            'CompanyStyle',
-            parent=styles['Normal'],
-            fontSize=11,
-            spaceAfter=2,
-            textColor='black'
-        )
-        
-        for i, line in enumerate(lines):
+        for line in lines:
             line = line.strip()
             if not line:
                 continue
                 
-            # Detect name (first significant non-contact line)
-            if not name_found and len(line.split()) <= 5 and not any(keyword in line.lower() for keyword in ['email', 'phone', '@', 'linkedin', 'experience', 'education', 'skills', 'summary', 'objective']):
+            # Detect name (first significant line)
+            if not name_found and len(line.split()) <= 5 and not any(keyword in line.lower() for keyword in ['email', 'phone', '@', 'linkedin', 'experience', 'education', 'skills']):
                 story.append(Paragraph(f'<b>{line}</b>', name_style))
                 name_found = True
-                story.append(Spacer(1, 8))
+                story.append(Spacer(1, 12))
                 continue
             
             # Detect contact information
-            if any(keyword in line.lower() for keyword in ['@', 'phone:', 'email:', 'linkedin', 'github', '+1', '(' in line and ')' in line]):
+            if any(keyword in line.lower() for keyword in ['@', 'phone', 'email', 'linkedin', 'github']):
                 story.append(Paragraph(line, contact_style))
                 continue
                 
             # Detect section headers
             if is_section_header(line):
-                current_section = line.lower()
                 story.append(Spacer(1, 16))
                 story.append(Paragraph(f'<b>{line.upper()}</b>', section_header_style))
                 story.append(Spacer(1, 8))
                 continue
             
-            # Enhanced bullet point detection
-            if (line.startswith('•') or line.startswith('-') or line.startswith('*') or 
-                line.startswith('\u2022') or line.startswith('\u2023') or line.startswith('\u25e6')):
+            # Detect bullet points
+            if line.startswith('•') or line.startswith('-') or line.startswith('*'):
                 clean_line = line[1:].strip()
                 story.append(Paragraph(f'• {clean_line}', bullet_style))
                 continue
             
-            # Detect job titles and companies (in experience section)
-            if current_section and 'experience' in current_section:
-                # Check if this looks like a job title or company
-                next_line = lines[i + 1].strip() if i + 1 < len(lines) else ''
-                
-                # If line is short and next line has dates, this is likely a job title
-                if (len(line.split()) <= 6 and 
-                    any(date_pattern in next_line for date_pattern in ['2019', '2020', '2021', '2022', '2023', '2024', '2025', 'present', 'current', '-'])):
-                    story.append(Paragraph(f'<b>{line}</b>', job_title_style))
-                    continue
-                
-                # If line contains common company indicators
-                if any(indicator in line.lower() for indicator in [', inc', ', llc', 'corporation', 'company', 'technologies', 'systems']):
-                    story.append(Paragraph(f'<i>{line}</i>', company_style))
-                    continue
-            
-            # Detect dates and duration
-            if any(pattern in line for pattern in ['2019', '2020', '2021', '2022', '2023', '2024', '2025']) and ('-' in line or 'to' in line.lower() or 'present' in line.lower()):
-                from reportlab.lib.colors import gray
-                date_style = ParagraphStyle(
-                    'DateStyle',
-                    parent=styles['Normal'],
-                    fontSize=10,
-                    spaceAfter=8,
-                    textColor=gray
-                )
-                story.append(Paragraph(f'<i>{line}</i>', date_style))
-                continue
-            
-            # Regular content with proper spacing
+            # Regular content
             if line:
                 story.append(Paragraph(line, styles['Normal']))
                 story.append(Spacer(1, 6))
